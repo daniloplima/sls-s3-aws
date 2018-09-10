@@ -1,0 +1,42 @@
+1 evento
+2 mapeou
+3 mong
+
+sls invoke local -f insert --data {
+    "Records": [
+        {
+            "eventVersion": "2.0",
+            "eventSource": "aws:s3",
+            "awsRegion": "us-east-1",
+            "eventTime": "2018-09-10T14:07:38.448Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AIDAJ73ZLHDKTUFY4OZWW"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "189.34.225.190"
+            },
+            "responseElements": {
+                "x-amz-request-id": "EFACBAD219E83A58",
+                "x-amz-id-2": "hWVfhTbDwgh2XjQle2XghpyW4+qg6mwsMIHLTbfi52wPkRkC4Pw5UZZTdsppuIMizV2ebhWtkiI="
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "1a40e754-68ff-48db-a67d-c7886e34a510",
+                "bucket": {
+                    "name": "exemplotriggerdanilo",
+                    "ownerIdentity": {
+                        "principalId": "A2FMSSJID7C5L6"
+                    },
+                    "arn": "arn:aws:s3:::exemplotriggerdanilo"
+                },
+                "object": {
+                    "key": "teste_pesquisa_beneficio.csv",
+                    "size": 409,
+                    "eTag": "fa5e5c73cb70ca2a9cbad647a9e79253",
+                    "sequencer": "005B967AAA67079C03"
+                }
+            }
+        }
+    ]
+}
