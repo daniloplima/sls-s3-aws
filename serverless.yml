@@ -36,6 +36,12 @@ iamRoleStatements:
       Action:
         - s3: PutObject
       Resource: arn:aws:s3:::exemplotriggerdanilo
+    - Effect : 'Allow'
+      Action:
+        - "sns:Publish"
+      Resource:
+        - "arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_2"  
+
 
 # you can define service wide environment variables here
 #  environment:
@@ -60,6 +66,9 @@ functions:
       - s3:
           bucket: exemplotriggeranilo
           event: s3:ObjectRemoved:*
+      - sns:
+          topicName: S3_AWS_SLS_SNS_1
+          displayName: PROCESSING   
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
@@ -96,12 +105,22 @@ functions:
 
 # you can add CloudFormation resource templates here
 #resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
+ #Resources:
+  # SnsFirstTopic:
+   # Properties:
+    #   DisplayName: PROCESSING
+     #  TopicName: S3_AWS_SLS_SNS_3
+  # SnsTopicPolicy:
+   #  Type: AWS::SNS::TopicPolicy
+    # Properties:
+     #  PolicyDocument:
+      #   Version: '2012-10-17'
+       #  Statement:
+        # - Sid: SnsTopicPolicy
+         #  Effect: Allow
+          # Principal:
+           #  Service: s3.amazonaws.com
+         #  Action: sns:Publish
+         #  Resource: "*"
+      # Topics:
+       #  - Ref: SnsFirstTopic

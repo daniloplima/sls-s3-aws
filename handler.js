@@ -2,20 +2,17 @@ const MongoClient = require('mongodb').MongoClient;
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const csv = require('csvtojson');
-<<<<<<< HEAD
-const sns = new AWS.SNS();
-AWS.config.update({ region: 'us-east-1' });
-
-=======
-const publishAsync = require('sns.publish');
+const { promisify } = require('util');
 // Create promise and SNS service object
 const sns = new AWS.SNS();
 AWS.config.update({ region: 'us-east-1' });
 
+const notify = () => sns.publish({
+  Message: 'test',
+  MessageStructure: 'json',
+  TargetArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_1'
+}).promise();
 
-
-
->>>>>>> cd582f94781b27b865693e3f52e2d6a8fa89e04d
 //Stores all of the registers in the csv file
 async function insert(json) {
   const connection = await MongoClient.connect(
@@ -24,38 +21,19 @@ async function insert(json) {
   const collection = connection.db('testecsv').collection('csv');
   console.log("conectado");
   json.map(async (item) => {
-    const { cpf, nmrBeneficio, nome, dtNascimento } = item;
+    const { cpf, nmrBeneficio, nome, dtNascimento, status } = item;
     await collection.insert({
       cpf: cpf,
       nmrBeneficio: nmrBeneficio,
       nome: nome,
       dtNascimento: dtNascimento,
-      status: "Pending"
-    });
-    console.log('sending push');
-    sns.publish({
-      Message: 'test',
-      MessageStructure: 'json',
-      TargetArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_2'
-    }, function (err, data) {
-      if (err) {
-        console.log(err.stack);
-        return;
-      }
-      console.log('push sent');
-      console.log(data);
+      status: status
     });
   });
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: 'Inserido com sucesso',
-    }),
-  };
+  return;
 }
 
-
-async function getObject(bucketName, bucketKey){
+async function getObject(bucketName, bucketKey) {
   return new Promise((resolve, reject) => {
     s3.getObject({
       Bucket: bucketName,
@@ -63,26 +41,6 @@ async function getObject(bucketName, bucketKey){
     }, (error, res) => error ? reject(error) : resolve(res))
   })
 }
-
-<<<<<<< HEAD
-=======
-async  function notify(){
-
-  console.log('sending push');
-  const result = await publishAsync({
-    Message: 'test',
-    MessageStructure: 'json',
-    TargetArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_2'
-  });
-  /*if (result.err) {
-    console.log(err.stack);
-    return;
-  }*/
-  console.log('push sent');
-  console.log(result);
-  return;
-};
->>>>>>> cd582f94781b27b865693e3f52e2d6a8fa89e04d
 
 module.exports.hello = async (event, context) => {
   //console.log('EVENTO RECEBIDO', JSON.stringify(event));
@@ -108,11 +66,14 @@ module.exports.hello = async (event, context) => {
       "cpf": toSplit[0],
       "nmrBeneficio": toSplit[1],
       "nome": toSplit[2],
-      "dtNascimento": toSplit[3]
+      "dtNascimento": toSplit[3],
+      "status": "Pending"
     });
   }
   //console.log(JSON.stringify(json));
   await insert(json);
+  const responseSNS = await notify();
+  console.log(responseSNS);
   return {
     statusCode: 200,
     body: JSON.stringify({
