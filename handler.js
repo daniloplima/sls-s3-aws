@@ -1,13 +1,17 @@
-var MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const csv = require('csvtojson');
+const publishAsync = require('sns.publish');
+// Create promise and SNS service object
+const sns = new AWS.SNS();
 AWS.config.update({ region: 'us-east-1' });
 
 
 
+
 //Stores all of the registers in the csv file
-const insert = async (json) => {
+async function insert(json) {
   const connection = await MongoClient.connect(
     'mongodb://danilopelozone:danilo123@ds247852.mlab.com:47852/testecsv', { useNewUrlParser: true }
   );
@@ -33,7 +37,7 @@ const insert = async (json) => {
 }
 
 
-const getObject = (bucketName, bucketKey) => {
+async function getObject(bucketName, bucketKey){
   return new Promise((resolve, reject) => {
     s3.getObject({
       Bucket: bucketName,
@@ -42,31 +46,22 @@ const getObject = (bucketName, bucketKey) => {
   })
 }
 
-const notify = async () => {
-  // Create publish parameters
-  var params = {
-    Message: 'test', /* required */
-    TopicArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_2'
-  };
+async  function notify(){
 
-  // Create promise and SNS service object
-  var sns = new AWS.SNS();
   console.log('sending push');
-  sns.publish({
-    Message: params.Message,
+  const result = await publishAsync({
+    Message: 'test',
     MessageStructure: 'json',
-    TargetArn: params.TopicArn
-  }, function (err, data) {
-    if (err) {
-      console.log(err.stack);
-      return;
-    }
-
-    console.log('push sent');
-    console.log(data);
+    TargetArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_2'
   });
-
-}
+  /*if (result.err) {
+    console.log(err.stack);
+    return;
+  }*/
+  console.log('push sent');
+  console.log(result);
+  return;
+};
 
 module.exports.hello = async (event, context) => {
   //console.log('EVENTO RECEBIDO', JSON.stringify(event));
