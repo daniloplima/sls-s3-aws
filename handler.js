@@ -5,13 +5,25 @@ const csv = require('csvtojson');
 const { promisify } = require('util');
 // Create promise and SNS service object
 const sns = new AWS.SNS();
+AWS.config.update({
+  accessKeyId : 'login',
+  secretAccessKey : 'senha'
+});
 AWS.config.update({ region: 'us-east-1' });
-
-const notify = () => sns.publish({
+const publishPromise = () =>{
+  sns.publish({
   Message: 'test',
   MessageStructure: 'json',
-  TargetArn: 'arn:aws:sns:us-east-1:102671261511:S3_AWS_SLS_SNS_1'
-}).promise();
+  TargetArn: 'arn:aws:sns:us-east-1:135152123371:S3_AWS_SLS_SNS'
+  }).promise()
+};
+
+
+/*const notify = () => sns.publish({
+  Message: 'test',
+  MessageStructure: 'json',
+  TargetArn: 'arn:aws:sns:us-east-1:135152123371:S3_AWS_SLS_SNS'
+}).promise();*/
 
 //Stores all of the registers in the csv file
 async function insert(json) {
@@ -42,7 +54,7 @@ async function getObject(bucketName, bucketKey) {
   })
 }
 
-module.exports.hello = async (event, context) => {
+module.exports.csvReader = async (event, context) => {
   //console.log('EVENTO RECEBIDO', JSON.stringify(event));
   const bucketName = event.Records[0].s3.bucket.name
   const bucketKey = event.Records[0].s3.object.key
@@ -70,10 +82,15 @@ module.exports.hello = async (event, context) => {
       "status": "Pending"
     });
   }
-  //console.log(JSON.stringify(json));
+  console.log(JSON.stringify(json));
   await insert(json);
-  const responseSNS = await notify();
-  console.log(responseSNS);
+  publishPromise()
+  .then((response) => {
+    console.log('Message published');
+  }, (err) => {
+    console.log('We had an error');
+  });
+  //console.log(responseSNS);
   return {
     statusCode: 200,
     body: JSON.stringify({
