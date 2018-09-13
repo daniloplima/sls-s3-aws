@@ -1,0 +1,19 @@
+{
+  "name": "s3-trigger-csv-to-sls",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.313.0",
+    "csv": "^3.1.0",
+    "csvtojson": "^2.0.8",
+    "mongodb": "^3.1.4",
+    "tojson": "^0.3.18"
+  }
+}

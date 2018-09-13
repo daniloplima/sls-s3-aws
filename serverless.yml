@@ -52,3 +52,99 @@ functions:
           displayName: PROCESSING
   
 
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: s3-trigger-csv-to-sls # NOTE: update this with your service name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+# you can overwrite defaults here
+  stage: dev
+  region: us-east-1
+
+ConsumerLambdaRole: 
+  Type: AWS::IAM::Role
+  Properties: 
+    AssumeRolePolicyDocument: 
+      Version: '2018-09-13'
+      Statement: 
+      - Effect: Allow
+        Principal: 
+          Service: lambda.amazonaws.com
+        Action: 
+        - sts:AssumeRole
+    Path: '/'
+    Policies: 
+    - PolicyName: logs
+      PolicyDocument: 
+        Statement: 
+        - Effect: Allow
+          Action: 
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource: arn:aws:logs:*:*:*
+    - PolicyName: sqs
+      PolicyDocument: 
+        Statement: 
+        - Effect: Allow
+          Action: 
+          - sqs:ReceiveMessage
+          - sqs:CreateQueue
+          - sqs:GetQueueUrl
+          - sqs:ListQueues
+          - sqs:SendMessage
+          - sqs:ReceiveMessage
+          Resource: arn:aws:sqs:us-east-1:135152123371:S3_AWS_SLS_SQS 
+    - PolicyName: lambda
+      PolicyDocument: 
+        Statement: 
+        - Effect: Allow
+          Action: 
+          - lambda:InvokeFunction
+          Resource: arn:aws:lambda:us-east-1:135152123371:function:s3-trigger-csv-to-sls-dev-csvReader  
+
+
+# you can add statements to the Lambda function's IAM Role here
+iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: arn:aws:s3:us-east-1:135152123371:readertrigger
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource: arn:aws:s3:us-east-1:135152123371:readertrigger
+
+functions:
+  csvReader:
+    handler: handler.csvReader
+    events:
+      - s3:
+          bucket: readertrigger
+          event: s3:ObjectCreated:*
+    environment:
+      keyid: seuid
+      secret: suachave
+
+
+
+  
+
